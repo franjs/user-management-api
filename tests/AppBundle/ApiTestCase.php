@@ -2,6 +2,7 @@
 
 namespace Tests\AppBundle;
 
+use AppBundle\Entity\Group;
 use AppBundle\Entity\User;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -414,12 +415,43 @@ class ApiTestCase extends KernelTestCase
     }
 
     /**
+     * @return Group
+     */
+    protected function createGroup()
+    {
+        $group = new Group();
+        $group->setName('Group Test');
+
+        $em = $this->getEntityManager();
+        $em->persist($group);
+        $em->flush();
+
+        return $group;
+    }
+
+    /**
      * @return User
      */
     protected function createUser()
     {
         $user = new User();
         $user->setName('User Test');
+
+        $em = $this->getEntityManager();
+        $em->persist($user);
+        $em->flush();
+
+        return $user;
+    }
+
+    /**
+     * @param User $user
+     * @param Group $group
+     * @return User
+     */
+    protected function assignUserToGroup(User $user, Group $group)
+    {
+        $user->assignTo($group);
 
         $em = $this->getEntityManager();
         $em->persist($user);
