@@ -174,8 +174,6 @@ class UserControllerTest extends ApiTestCase
             'headers' => $this->getAuthorizedHeaders('admin')
         ]);
 
-        $this->debugResponse($response);
-
         $this->assertEquals(200, $response->getStatusCode());
     }
 

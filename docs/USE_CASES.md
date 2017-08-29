@@ -1,4 +1,4 @@
-Enpoints for Use Cases 
+Endpoints for Use Cases 
 =======================
 
 ### As an admin I can add users:
