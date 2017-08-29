@@ -155,4 +155,56 @@ class UserControllerTest extends ApiTestCase
             'The user is already assigned to the group given'
         );
     }
+
+    /**
+     * @test
+     */
+    public function testRemoveUserFromGroup()
+    {
+        $user = $this->createUser();
+        $group = $this->createGroup();
+        $group2 = $this->createGroup('group test 2');
+        $this->assignUserToGroup($user, $group);
+        $this->assignUserToGroup($user, $group2);
+
+        /** @var Response $response */
+        $response = $this->client->post(
+            '/api/users/' . $user->getId() . '/remove-from-group', [
+            'body' => json_encode(['group_id' => $group->getId()]),
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
+
+        $this->debugResponse($response);
+
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function testRemoveUserFromGroupIsNotMemberThrowsAnException()
+    {
+        $user = $this->createUser();
+        $group = $this->createGroup();
+
+        /** @var Response $response */
+        $response = $this->client->post(
+            '/api/users/' . $user->getId() . '/remove-from-group', [
+            'body' => json_encode(['group_id' => $group->getId()]),
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
+
+        $contentType = $response->getHeader('Content-Type');
+
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('application/problem+json', $contentType[0]);
+        $this->asserter()->assertResponsePropertyEquals($response, 'type', 'about:blank');
+        $this->asserter()->assertResponsePropertyEquals($response, 'title', 'Bad Request');
+        $this->asserter()->assertResponsePropertyEquals($response, 'status', 400);
+        $this->asserter()->assertResponsePropertyEquals(
+            $response,
+            'detail',
+            'The user is not a member of the group given'
+        );
+    }
 }

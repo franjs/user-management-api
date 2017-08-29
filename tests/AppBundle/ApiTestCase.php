@@ -415,12 +415,14 @@ class ApiTestCase extends KernelTestCase
     }
 
     /**
+     * @param string|null $name
      * @return Group
      */
-    protected function createGroup()
+    protected function createGroup(string $name = null)
     {
+        $groupName = empty($name) ? 'Group Test' : $name;
         $group = new Group();
-        $group->setName('Group Test');
+        $group->setName($groupName);
 
         $em = $this->getEntityManager();
         $em->persist($group);

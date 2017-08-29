@@ -61,7 +61,7 @@ class SecurityController extends BaseController
             'exp' => time() + 3600 // 1 hour expiration
         ]);
 
-        $response = $this->createApiResponse(['token' => $token, 200]);
+        $response = $this->createApiResponse(['token' => $token], 200);
 
         return $response;
     }

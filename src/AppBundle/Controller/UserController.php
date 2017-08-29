@@ -178,4 +178,57 @@ class UserController extends BaseController
 
         return $response;
     }
+
+    /**
+     * @Route("/users/{userId}/remove-from-group", name="user_user_from_group")
+     * @Method("POST")
+     *
+     *  @ApiDoc(
+     *    description="Remove a User from a Group",
+     *    parameters={
+     *      {"name"="group_id", "dataType"="integer", "required"=true, "description"="group id"}
+     *  }
+     * )
+     *
+     * @param Request $request
+     * @param int $userId
+     * @return Response
+     */
+    public function removeFromGroupAction(Request $request, $userId)
+    {
+        $em = $this->getDoctrine()->getManager();
+        /** @var User $user */
+        $user = $em->getRepository(User::class)->find($userId);
+
+        if (!$user) {
+            throw $this->createNotFoundException(sprintf('No user found by ID "%s"', $userId));
+        }
+
+        $form = $this->createForm(GroupIdType::class);
+        $this->processForm($request, $form);
+
+        if (!$form->isValid()){
+            $this->throwApiProblemValidationException($form);
+        }
+
+        $groupId = $form->get('group_id')->getData();
+        $group = $em->getRepository(Group::class)->find($groupId);
+
+        if (!$group) {
+            throw $this->createNotFoundException(sprintf('No group found by ID "%s"', $groupId));
+        }
+
+        if (!$user->isMemberOf($group)) {
+            throw new BadRequestHttpException('The user is not a member of the group given');
+        }
+
+        $user->removeFrom($group);
+
+        $em->persist($user);
+        $em->flush();
+
+        $response = $this->createApiResponse($user);
+
+        return $response;
+    }
 }
