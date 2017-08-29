@@ -435,6 +435,9 @@ class ApiTestCase extends KernelTestCase
     protected function createUser()
     {
         $user = new User();
+        $user->setUsername('test');
+        $user->setPassword('test-password');
+        $user->setEmail('test@test.com');
         $user->setName('User Test');
 
         $em = $this->getEntityManager();
@@ -442,6 +445,40 @@ class ApiTestCase extends KernelTestCase
         $em->flush();
 
         return $user;
+    }
+
+    /**
+     * @return User
+     */
+    protected function createUserAdmin()
+    {
+        $userAdmin = new User();
+        $userAdmin->setUsername('admin');
+        $userAdmin->setPassword('admin');
+        $userAdmin->setEmail('admin@test.com');
+        $userAdmin->setName('User Admin');
+        $userAdmin->addRole('ROLE_ADMIN');
+
+        $em = $this->getEntityManager();
+        $em->persist($userAdmin);
+        $em->flush();
+
+        return $userAdmin;
+    }
+
+    protected function createUserData()
+    {
+        $data = [
+            'username' => 'username',
+            'password' => 'password',
+            'email' => 'test@test.com',
+            'name' => 'test name',
+            'roles' => [
+                'ROLE_USER'
+            ]
+        ];
+
+        return $data;
     }
 
     /**

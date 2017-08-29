@@ -9,11 +9,17 @@ use AppBundle\Form\Type\UserType;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-
+/**
+ * Class UserController
+ * @package AppBundle\Controller
+ *
+ * @Security("is_granted('ROLE_ADMIN')")
+ */
 class UserController extends BaseController
 {
     /**
@@ -78,7 +84,7 @@ class UserController extends BaseController
     public function showAction($userId)
     {
         $user = $this->getDoctrine()
-            ->getRepository('AppBundle:User')
+            ->getRepository(User::class)
             ->find($userId);
 
         if (!$user) {
@@ -108,7 +114,7 @@ class UserController extends BaseController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $user = $em->getRepository('AppBundle:User')->find($userId);
+        $user = $em->getRepository(User::class)->find($userId);
 
         if (!$user) {
             throw $this->createNotFoundException(sprintf('No user found by ID "%s"', $userId));

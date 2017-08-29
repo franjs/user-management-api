@@ -45,3 +45,13 @@ services:
 
     api.response_factory:
         class: AppBundle\Api\ResponseFactory
+
+    app.doctrine.hash_password_listener:
+        class: AppBundle\Doctrine\HashPasswordListener
+        autowire: true
+        tags:
+            - { name: doctrine.event_subscriber }
+
+    jwt_token_authenticator:
+        class: AppBundle\Security\JwtTokenAuthenticator
+        autowire: true

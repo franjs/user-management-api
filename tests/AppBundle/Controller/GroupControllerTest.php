@@ -8,6 +8,13 @@ use Tests\AppBundle\ApiTestCase;
 
 class GroupControllerTest extends ApiTestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->createUserAdmin();
+    }
+
     /**
      * @test
      */
@@ -17,7 +24,8 @@ class GroupControllerTest extends ApiTestCase
 
         /** @var Response $response */
         $response = $this->client->post('/api/groups', [
-            'body' => json_encode($data)
+            'body' => json_encode($data),
+            'headers' => $this->getAuthorizedHeaders('admin')
         ]);
 
         $responseData = json_decode($response->getBody(), true);
@@ -42,7 +50,9 @@ class GroupControllerTest extends ApiTestCase
     {
         $group = $this->createGroup();
         /** @var Response $response */
-        $response = $this->client->get('/api/groups/'.$group->getId());
+        $response = $this->client->get('/api/groups/'.$group->getId(), [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertJsonResponse($response);
@@ -59,7 +69,9 @@ class GroupControllerTest extends ApiTestCase
      */
     public function test404Exception()
     {
-        $response = $this->client->get('/api/groups/fake');
+        $response = $this->client->get('/api/groups/fake', [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
 
         $contentType = $response->getHeader('Content-Type');
 
@@ -82,7 +94,9 @@ class GroupControllerTest extends ApiTestCase
     {
         $group = $this->createGroup();
 
-        $response = $this->client->delete('/api/groups/'.$group->getId());
+        $response = $this->client->delete('/api/groups/'.$group->getId(), [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
         $data = json_decode($response->getBody(), true);
 
         $this->assertEquals(204, $response->getStatusCode());
@@ -98,7 +112,9 @@ class GroupControllerTest extends ApiTestCase
         $user = $this->createUser();
         $this->assignUserToGroup($user, $group);
 
-        $response = $this->client->delete('/api/groups/'.$group->getId());
+        $response = $this->client->delete('/api/groups/'.$group->getId(), [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
 
         $contentType = $response->getHeader('Content-Type');
 

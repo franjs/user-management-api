@@ -8,16 +8,24 @@ use Tests\AppBundle\ApiTestCase;
 
 class UserControllerTest extends ApiTestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->createUserAdmin();
+    }
+
     /**
      * @test
      */
     public function testPostUser()
     {
-        $data = ['name' => 'test name'];
+        $data = $this->createUserData();
 
         /** @var Response $response */
         $response = $this->client->post('/api/users', [
-            'body' => json_encode($data)
+            'body' => json_encode($data),
+            'headers' => $this->getAuthorizedHeaders('admin')
         ]);
 
         $responseData = json_decode($response->getBody(), true);
@@ -42,16 +50,23 @@ class UserControllerTest extends ApiTestCase
     {
         $user = $this->createUser();
         /** @var Response $response */
-        $response = $this->client->get('/api/users/'.$user->getId());
+        $response = $this->client->get('/api/users/'.$user->getId(), [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertJsonResponse($response);
         $this->asserter()->assertResponsePropertiesExist($response, array(
             'id',
-            'name'
+            'name',
+            'roles',
+            'username',
+            'email'
         ));
         $this->asserter()->assertResponsePropertyEquals($response, 'id', $user->getId());
-        $this->asserter()->assertResponsePropertyEquals($response, 'name', 'User Test');
+        $this->asserter()->assertResponsePropertyEquals($response, 'username', $user->getUsername());
+        $this->asserter()->assertResponsePropertyEquals($response, 'email', $user->getEmail());
+        $this->asserter()->assertResponsePropertyEquals($response, 'name', $user->getName());
     }
 
     /**
@@ -59,7 +74,9 @@ class UserControllerTest extends ApiTestCase
      */
     public function test404Exception()
     {
-        $response = $this->client->get('/api/users/fake');
+        $response = $this->client->get('/api/users/fake', [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
 
         $contentType = $response->getHeader('Content-Type');
 
@@ -82,7 +99,9 @@ class UserControllerTest extends ApiTestCase
     {
         $user = $this->createUser();
 
-        $response = $this->client->delete('/api/users/'.$user->getId());
+        $response = $this->client->delete('/api/users/'.$user->getId(), [
+            'headers' => $this->getAuthorizedHeaders('admin')
+        ]);
         $data = json_decode($response->getBody(), true);
 
         $this->assertEquals(204, $response->getStatusCode());
@@ -100,7 +119,8 @@ class UserControllerTest extends ApiTestCase
         /** @var Response $response */
         $response = $this->client->post(
             '/api/users/' . $user->getId() . '/assign-to-group', [
-            'body' => json_encode(['group_id' => $group->getId()])
+            'body' => json_encode(['group_id' => $group->getId()]),
+            'headers' => $this->getAuthorizedHeaders('admin')
         ]);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -118,7 +138,8 @@ class UserControllerTest extends ApiTestCase
         /** @var Response $response */
         $response = $this->client->post(
             '/api/users/' . $user->getId() . '/assign-to-group', [
-            'body' => json_encode(['group_id' => $group->getId()])
+            'body' => json_encode(['group_id' => $group->getId()]),
+            'headers' => $this->getAuthorizedHeaders('admin')
         ]);
 
         $contentType = $response->getHeader('Content-Type');
